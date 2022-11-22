@@ -1,4 +1,4 @@
-package com.atguigu.heap;
+package com.atguigu.jvm.heap;
 
 public class HeapDemo {
 	public static void main(String[] args) {
