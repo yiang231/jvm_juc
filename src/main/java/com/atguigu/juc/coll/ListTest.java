@@ -1,19 +1,49 @@
 package com.atguigu.juc.coll;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ListTest {
 	public static void main(String[] args) {
 		ArrayList<String> arrayList = new ArrayList<>();
-		CopyOnWriteArrayList<String> copyOnWriteArrayList = new CopyOnWriteArrayList<>();
+		CopyOnWriteArrayList<String> copyOnWriteArrayList = new CopyOnWriteArrayList<>(); // 本质为数组,使用的是可重入锁
+		Vector<String> vector = new Vector<>();
+		List<String> synchronizedList = Collections.synchronizedList(new ArrayList<>());
 //		listError1(arrayList);
 		listIterator(arrayList); // 解决办法一
-		copyOnWriteArrayList(copyOnWriteArrayList); // 解决办法二
+		copyOnWriteArrayList(copyOnWriteArrayList); // 解决办法二 优先
+		useVector(vector); // 解决办法三 // public synchronized boolean add(E e)
+		useSynchronizedList(synchronizedList); // 解决办法四
 		// java.util.ConcurrentModificationException	并发修改异常 保护集合安全性
+	}
+
+	private static void useSynchronizedList(List<String> synchronizedList) {
+		for (int i = 0; i < 200; i++) {
+			new Thread(() -> {
+				synchronizedList.add(UUID.randomUUID().toString());
+				synchronizedList.forEach(System.out::println);
+			}).start();
+		}
+	}
+
+	private static void useVector(Vector<String> vector) {
+		vector.add("1");
+		vector.add("2");
+		vector.add("3");
+		vector.add("4");
+
+		for (int i = 0; i < 1000; i++) {
+			new Thread(() -> {
+				vector.add(UUID.randomUUID().toString());
+				vector.forEach(System.out::println);
+			}).start();
+		}
 	}
 
 	private static void copyOnWriteArrayList(CopyOnWriteArrayList<String> copyOnWriteArrayList) {
